@@ -183,15 +183,20 @@ def chat():
     return 'ok', 200
 
 
-@app.route('/getcategories', methods=['POST'], endpoint='get_categories')
+@app.route('/getcategory', methods=['POST', 'GET'], endpoint='get_categories')
 def get_categories():
     data = request.get_json()
-    data_json = dict(categorie=data['categorie'])
+    print(data['category'])
+    data_json = dict(categorie=data['category'])
+    data_dao = DAO()
+    retorno = data_dao.get_category(data['category'])
+    return jsonify({"data": retorno})
 
-@app.route('/avatar', methods=['POST'], endpoint='avatar')
+@app.route('/avatar', methods=['GET'], endpoint='avatar')
 def get_categories():
     data = request.get_json()
     data_json = dict(categorie=data['categorie'])
+    
 
 
 

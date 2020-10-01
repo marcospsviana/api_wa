@@ -7,8 +7,8 @@ class DataAccesObjects(object):
         self.__data.cadastro_user(dados)
         
         
-    def cadastro_photos_user(self, id, key_number, dados):
-        self.__data.cadastro_photos_user(id, key_number, dados)
+    def cadastro_photos_user(self, id, dados):
+        self.__data.cadastro_photos_user(id, dados)
     
     
     def delete_photos_user(self, idUser, key_number):

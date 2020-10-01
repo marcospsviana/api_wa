@@ -87,11 +87,11 @@ def upload_profile():
             key_number = (filename_image.split('_')[-1]).replace('.jpg', '')
             print("key number %s"%key_number)
             exist_path = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s'%(filename_directory, filename_path)
-            f = open('verificacao.txt', 'w')
-            f.write(filename_image+'\n')
-            f.write(filename_directory+'\n')
-            f.write(filename_path+'\n')
-            f.close()
+            #f = open('verificacao.txt', 'w')
+            #f.write(filename_image+'\n')
+            #f.write(filename_directory+'\n')
+            #f.write(filename_path+'\n')
+            #f.close()
             if os.path.exists(exist_path):
                 destination = os.path.join('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories',filename_directory, filename_path, filename_image)
             else:
@@ -99,7 +99,13 @@ def upload_profile():
                 os.makedirs('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s'%(filename_directory, filename_path))
                 destination = os.path.join("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories",filename_directory, filename_path, filename_image)
             file.save(destination)
-            data_dao.cadastro_photos_user(filename_path,key_number,destination)
+            photos_str = ''
+            photos_dir = os.listdir(os.path.join("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories",filename_directory, filename_path))
+            str_photos = ''
+            for p in photos_dir:
+                str_photos = str_photos + '###' + str(p)
+            print("photos_dir %s"%photos_dir)
+            data_dao.cadastro_photos_user(filename_path, str(str_photos))
             
             
        
@@ -114,20 +120,21 @@ def offer_service():
     destination = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s/%s.json'%(data['categories'], data['idUser'], data['idUser'])
     destination_dir = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s'%(data['categories'], data['idUser'])
     if os.path.exists(destination_dir):
-        print(data_json)
-        print(data['name'])
-        print(data['idUser'])
-        f = open(destination, 'w')
-        json.dump(data_json, f)
-        f.close()
+        #print(data_json)
+        #print(data['name'])
+        #print(data['idUser'])
+        #f = open(destination, 'w')
+        #json.dump(data, f)
+        #f.close()
+        ...
     else:
         os.makedirs(destination_dir)
-        print(data_json)
-        print(data['name'])
-        print(data['idUser'])
-        f = open(destination, 'w')
-        json.dump(data_json, f)
-        f.close()
+        #print(data_json)
+        #print(data['name'])
+        #print(data['idUser'])
+        #f = open(destination, 'w')
+        #json.dump(data, f)
+        #f.close()
     data_dao.cadastro_user(data)
        
     return 'ok', 200
@@ -179,7 +186,6 @@ def chat():
     f = open(destination, 'w+')
     json.dump(data_json, f)
     f.close()   
-       
     return 'ok', 200
 
 
@@ -190,7 +196,10 @@ def get_categories():
     data_json = dict(categorie=data['category'])
     data_dao = DAO()
     retorno = data_dao.get_category(data['category'])
-    return jsonify({"data": retorno})
+    data = {json.dumps(retorno)}
+    print(retorno)
+    response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    return response
 
 @app.route('/avatar', methods=['GET'], endpoint='avatar')
 def get_categories():

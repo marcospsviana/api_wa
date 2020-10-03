@@ -17,3 +17,6 @@ class DataAccesObjects(object):
     def get_category(self, category):
         retorno = self.__data.get_category(category)
         return retorno
+    
+    def avatar(self,filename_path, destination):
+        self.__data.avatar(filename_path, destination)

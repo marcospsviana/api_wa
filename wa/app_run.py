@@ -29,10 +29,10 @@ def index():
 def upload_file():
     
     if request.method == 'POST':
-        for file in request.files.getlist('image'):
+        for file in request.files.getlist('images'):
             filename_image = file.filename
-            filename_path = (filename_image.rsplit('.jpg'))[0]
-            filename_categorie =  (filename_image.rsplit('_'))[1]
+            filename_path = (filename_image.rsplit('avatar.jpg'))[0]
+            #filename_categorie =  (filename_image.rsplit('_'))[1]
             f = open('verificacao.txt', 'w')
             f.write(filename_image+'\n')
             #f.write(filename_path+'\n')
@@ -201,10 +201,34 @@ def get_categories():
     response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
     return response
 
-@app.route('/avatar', methods=['GET'], endpoint='avatar')
-def get_categories():
-    data = request.get_json()
-    data_json = dict(categorie=data['categorie'])
+@app.route('/avatar', methods=['POST'], endpoint='avatar')
+def avatar():
+    if request.method == 'POST':
+        data_dao = DAO()
+        for file in request.files.getlist('avatar'):
+            filename_image = file.filename
+            image_name = 'avatar.jpg'
+            print("filename_image %s"%filename_image)
+            full_name = filename_image.rsplit('avatar.jpg')
+            full_name = full_name[0].rsplit('_')
+            filename_path = full_name[0] + '_' + full_name[1]#(filename_image.rsplit('avatar.jpg'))[0]
+            print("filename_path %s"%filename_path)
+            filename_categorie =  full_name[2]#(filename_image.rsplit('_'))[1]
+            print("filename_categorie %s"%filename_categorie)
+            f = open('verificacao.txt', 'w')
+            f.write(filename_image+'\n')
+            #f.write(filename_path+'\n')
+            f.close()
+            if os.path.exists('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/'+ filename_categorie +'/avatares/'+ filename_path):
+                destination = os.path.join('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories',filename_categorie,'avatares', filename_path, image_name)
+            else:
+                os.makedirs('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/'+ filename_categorie + '/avatares/' + filename_path)
+                destination = os.path.join('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories',filename_categorie,'avatares', filename_path, image_name)
+            file.save(destination)
+            image_database =  os.path.join('/static/profiles/offerservice/categories',filename_categorie,'avatares', filename_path, image_name)
+            data_dao.avatar(filename_path, image_database)
+       
+        return 'ok', 200
     
 
 

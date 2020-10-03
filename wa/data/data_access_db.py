@@ -120,6 +120,9 @@ class DataAccessDB:
             d["saves"] = r[13]
             d["photos"] = r[14]
             d["dateRegister"] = r[15]
+            if d["total_votos"] == 0:
+                d["total_votos"] = 1
+            d["rate"] = d["likes"] / d["total_votos"]
             array_response.append(d)
         dados = json.dumps(array_response) #.replace("[","")
         #dados = dados.replace("]","")
@@ -131,5 +134,12 @@ class DataAccessDB:
         #dados = dados.replace(",\n",",")
         #print(dados)
         return dados
+    
+    @classmethod
+    def avatar(self,filename_path, destination):
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute("""UPDATE tb_user SET avatarUrl = '%s'  WHERE idUser = '%s'"""%(destination, filename_path))
+        __conn.commit()
 
         

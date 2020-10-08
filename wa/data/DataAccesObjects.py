@@ -20,3 +20,7 @@ class DataAccesObjects(object):
     
     def avatar(self,filename_path, destination):
         self.__data.avatar(filename_path, destination)
+    
+    def get_user_depoimentos(self, idUser):
+        retorno = self.__data.get_user_depoimentos(idUser)
+        return retorno

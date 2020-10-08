@@ -231,6 +231,17 @@ def avatar():
         return 'ok', 200
     
 
+@app.route('/getuserdepoimentos', methods=['POST'], endpoint='get_user_depoimentos')
+def get_user_depoimentos():
+    data_dao = DAO()
+    data = request.get_json()
+    print("DATA IN GETUSERDEPOIMENTOS %s"%data)
+    retorno =  data_dao.get_user_depoimentos(data['idUser'])
+    data = {json.dumps(retorno)}
+    print(retorno)
+    response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    return response
+    
 
 
 if __name__ == '__main__':

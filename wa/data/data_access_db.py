@@ -30,7 +30,7 @@ class DataAccessDB:
   `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `likes` int(10) DEFAULT NULL,
   `dislikes` int(10) DEFAULT NULL,
-  `total_votos` int(15) DEFAULT NULL,
+  `totalVotos` int(15) DEFAULT NULL,
   `localization` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` float DEFAULT NULL,
   `saves` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -39,6 +39,18 @@ class DataAccessDB:
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"""
             )
+        
+        self.__cursor.execute("""CREATE TABLE IF NOT EXISTS worldangels.tb_depoimentos (
+	id BIGINT auto_increment NULL,
+	idUser TEXT NOT NULL,
+	depoimentos LONGTEXT NOT NULL,
+	likes BIT DEFAULT 0 NULL,
+	dislike BIT DEFAULT 0 NULL,
+	PRIMARY KEY (id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;""")
         
     @classmethod
     def db_conn(self):
@@ -51,7 +63,7 @@ class DataAccessDB:
         __cursor = __conn.cursor()
         print(data['localization'])
         __cursor.execute("""
-        INSERT INTO tb_user (id,idUser,avatarUrl,name,email,categories,subcategories,description,likes,dislikes,total_votos,localization,price,saves, photos) VALUES (null, '%s', null, '%s','%s', '%s', '%s','%s', 0, 0, 0,'%s,%s',0,null,null)"""%(data['idUser'],data['name'],data['email'],data['categories'],data['subCategories'],data['description'],data['localization'][1],data['localization'][2]))
+        INSERT INTO tb_user (id,idUser,avatarUrl,name,email,categories,subcategories,description,likes,dislikes,totalVotos,localization,price,saves, photos) VALUES (null, '%s', null, '%s','%s', '%s', '%s','%s', 0, 0, 0,'%s,%s',0,null,null)"""%(data['idUser'],data['name'],data['email'],data['categories'],data['subCategories'],data['description'],data['localization'][1],data['localization'][2]))
        # __cursor.execute(""" INSERT INTO tb_user_json (id, user) VALUES ( null, '{"user":'%s'}') """%data)
         __conn.commit()
     
@@ -114,25 +126,18 @@ class DataAccessDB:
             d["description"] = r[7]
             d["likes"] = r[8]
             d["dislikes"] = r[9]
-            d["total_votos"] = r[10]
+            d["totalVotos"] = r[10]
             d["localization"] = r[11]
             d["price"] = r[12]
             d["saves"] = r[13]
             d["photos"] = r[14]
             d["dateRegister"] = r[15]
-            if d["total_votos"] == 0:
-                d["total_votos"] = 1
-            d["rate"] = d["likes"] / d["total_votos"]
+            if d["totalVotos"] == 0:
+                d["totalVotos"] = 1
+            d["rate"] = d["likes"] / d["totalVotos"]
             array_response.append(d)
-        dados = json.dumps(array_response) #.replace("[","")
-        #dados = dados.replace("]","")
-        #dados = dados.replace("\"\\",",\n")
-        #dados = dados.replace(",",",\n")
-        #dados = dados.replace("\\", "")
-        #dados = dados.replace("{","{\n")
-        #dados = dados.replace("}","\n}")
-        #dados = dados.replace(",\n",",")
-        #print(dados)
+            print(" total votos %d" %d["totalVotos"])
+        dados = json.dumps(array_response) 
         return dados
     
     @classmethod
@@ -141,5 +146,53 @@ class DataAccessDB:
         __cursor = __conn.cursor()
         __cursor.execute("""UPDATE tb_user SET avatarUrl = '%s'  WHERE idUser = '%s'"""%(destination, filename_path))
         __conn.commit()
+    
+    @classmethod
+    def get_user_profile(self, idUser):
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute("SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister, FROM tb_user where idUser = '%s'"%(idUser))
+        response = __cursor.fetchall()
+        array_response = []
+        dados = {}
+        for r in response:
+            d["name"] = r[0]
+            d["avatarUrl"] = r[1]
+            d["categories"] = r[2]
+            d["subCategories"] = r[3]
+            d["description"] = r[4]
+            d["likes"] = r[5]
+            d["dislikes"] = r[6]
+            d["totalVotos"] = r[7]
+            d["localization"] = r[8]
+            d["price"] = r[9]
+            d["photos"] = r[10]
+            d["dateRegister"] = r[11]
+            if d["totalVotos"] == 0:
+                d["totalVotos"] = 1
+            d["rate"] = d["likes"] / d["totalVotos"]
+            array_response.append(d)
+            
+        dados = json.dumps(array_response)
+        return dados
+    
+    @classmethod
+    def get_user_depoimentos(self, idUser):
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute("SELECT * FROM tb_depoimentos where idUser = '%s'"%(idUser))
+        response = __cursor.fetchall()
+        array_response = []
+        dados = {}
+        for r in response:
+            d = collections.OrderedDict()
+            d["titulo"] = r[2]
+            d["depoimentos"] = r[3]
+            d["likes"] = r[4]
+            d["dislike"] = r[5]
+            array_response.append(d)
+        dados = json.dumps(array_response)
+        return dados
+        
 
         

@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from os import listdir
 from os.path import join, isfile
 from data.DataAccesObjects import DataAccesObjects as DAO
-
+from flask_socketio import SocketIO
  
  
 UPLOAD_FOLDER = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/categories'
@@ -14,6 +14,7 @@ ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
  
  
 app = Flask(__name__)
+socketio = SocketIO(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
  
@@ -110,6 +111,49 @@ def upload_profile():
             
        
         return 'ok', 200
+    
+@socketio.on('/chat')
+def chat_socket(data):
+    prin('recebido json socket: ' + str(data))
+    
+    
+@app.route('/chat', methods=['POST'], endpoint='chat')
+def chat():
+    data = request.get_json()
+    print("data chat %s"%data)
+    data_dao = DAO()
+    
+    file_chat = "%s_%s.txt"%(data['from'],data['to'])
+    file_chat2 = "%s_%s.txt"%(data['to'], data['from'])
+    if data['from'] in os.listdir("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat"):
+        print("VAI GRAVAR......")
+        #if file_chat in os.listdir(os.path.join("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat",data['from'])):
+        f = open("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s/%s_%s.txt"%(data['from'], data['from'],data['to']), '+a')
+        #else if file_chat2 in os.listdir(os.path.join("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat",data['from'])):
+        f.write("to: " + data['to']+ " " + "message: " + data['message'] + "\n")
+        f.close()
+        
+    else:
+        print("JÁ GRAVOU....")
+        os.makedirs("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s"%data['from'])
+        f = open("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s/%s_%s.txt"%(data['from'], data['from'],data['to']), '+a')
+        f.write("to: " + data['to']+ " " + "message: " + data['message'] + "\n")
+        f.close()
+        
+    if data['to'] in os.listdir("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat"):
+        print("GRAVANDO DENOVO....")
+        f = open("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s/%s_%s.txt"%(data['to'], data['from'],data['to']), '+a')
+        f.write("from: " + data['from'] + " " + "message: " + data['message'] + "\n")
+        f.close()
+        
+    else:
+        print("JA GRAVOU DENOVO....")
+        os.makedirs("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s"%data['to'])
+        f = open("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s/%s_%s.txt"%(data['to'], data['from'],data['to']), '+a')
+        f.write("from: " + data['from'] + " " + "message: " + data['message'] + "\n")
+        f.close()
+    return 'ok',200
+            
 
 @app.route('/offerservice', methods=['POST', 'PUT'], endpoint='offer_service')
 def offer_service():
@@ -178,15 +222,6 @@ def search_professional():
     return jsonify({"statuscode":'ok', "data": arqujson})
     
 
-@app.route('/chat', methods=['POST', 'PUT'], endpoint='chat')
-def chat():
-    data = request.get_json()
-    data_json = dict(by=data['by'], to=data['to'], message=data['message'], dateMessage=data['dateMessage'])
-    destination = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/chat/%s.json'%(data['by'])
-    f = open(destination, 'w+')
-    json.dump(data_json, f)
-    f.close()   
-    return 'ok', 200
 
 
 @app.route('/getcategory', methods=['POST', 'GET'], endpoint='get_categories')
@@ -245,4 +280,4 @@ def get_user_depoimentos():
 
 
 if __name__ == '__main__':
-    app.run(host='10.15.1.45', port=5000, debug=True)
+    socketio.run(app, host='10.15.1.45', port=5000, debug=True)

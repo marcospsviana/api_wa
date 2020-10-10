@@ -98,7 +98,7 @@ COLLATE=utf8mb4_unicode_ci;""")
         if response == None or response == '' or response == []:
             return ("não há foto com estes dados")
         else:
-            __cursor.execute("""UPDATE tb_user SET photos = JSON_REMOVE(photos, '$.%s') WHERE idUser = '%s'"""%(key_number, idUser))
+            __cursor.execute("""UPDATE tb_user SET photos = '%s' WHERE idUser = '%s'"""%(key_number, idUser))
             __conn.commit()
     
     @classmethod

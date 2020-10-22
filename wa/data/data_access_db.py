@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
 import os
 import sqlite3
 import mysql.connector as mdb
 import json
 import pandas as pd
 import collections
+from datetime import datetime
 
 class DataAccessDB:
+    
     def __init__(self):
         self.__host = 'localhost'
         self.__user = 'root'
@@ -52,10 +55,90 @@ ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;""")
         
+        self.__cursor.execute("""CREATE TABLE IF NOT EXISTS worldangels.tb_chat (
+	id_chat BIGINT auto_increment NOT NULL,
+	idUser TEXT NOT NULL,
+	`from` varchar(100) NULL,
+	`to` varchar(100) NULL,
+	message LONGTEXT NULL,
+	PRIMARY KEY (id_chat)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;""")
+        
+        
+        
     @classmethod
     def db_conn(self):
         self.__conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
         return self.__conn
+    
+    @classmethod
+    def receive_chat(self, idUser):
+        print("id user em receive_chat %s"%idUser)
+        data_array = []
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        #__cursor.execute(""" SELECT * FROM tb_chat WHERE idUserSender = '%s' or idUserReceiver = '%s'"""%(idUser, idUser))
+        __cursor.execute("""select *  from tb_chat where idUserSender = "%s" group by idUserReceiver  ORDER BY (date) ASC"""%(idUser))
+        #__cursor.execute("""select * , COUNT(idUserSender) from tb_chat where idUserSender = '%s' or idUserReceiver = '%s' group by id_chat HAVING COUNT(idUserSender) > 0 ORDER BY (date) ASC;"""%(idUser, idUser))
+        response = __cursor.fetchall()
+        #print("response in data access %s "%response)
+        for r in response:
+            d = collections.OrderedDict()
+            d["id_chat"] = r[0]
+            d["idUserSender"] = r[1]
+            d["idUserReceiver"] = r[2]
+            d["message"] = r[3]
+            d["date_message"] = r[4]
+            data_array.append(d)
+        
+        #data = json.dumps(data_array)
+        return data_array
+    @classmethod
+    def receive_chat_unique(self, idUserReceiver):
+        data_array = []
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute(""" SELECT * FROM tb_chat WHERE (idUserSender = '%s' or idUserReceiver = '%s')"""%(idUserReceiver, idUserReceiver))
+        #__cursor.execute("""select * from tb_chat where idUserSender = '%s' OR idUserReceiver = '%s' group by idUserReceiver having count(id_chat) > 0 ORDER BY (id_chat) ASC;"""%(idUser, idUser))
+        #__cursor.execute("""select * , COUNT(idUserReceiver) from tb_chat where idUserSender = '%s' or idUserReceiver = '%s'  and date = (select max(date) from tb_chat) group by idUserReceiver HAVING #COUNT(idUserReceiver) > 0 ORDER BY (date) ASC;"""%(idUserReceiver, idUserReceiver))
+        response = __cursor.fetchall()
+        #print("response in data access %s "%response)
+        for r in response:
+            d = collections.OrderedDict()
+            d["id_chat"] = r[0]
+            d["idUserSender"] = r[1]
+            d["idUserReceiver"] = r[2]
+            d["message"] = r[3]
+            d["date_message"] = r[4]
+            data_array.append(d)
+        
+        #data = json.dumps(data_array)
+        return data_array
+    
+    @classmethod
+    def insert_chat(self, data):
+        DIAS = [
+            'Segunda-feira',
+            'Terça-feira',
+            'Quarta-feira',
+            'Quinta-Feira',
+            'Sexta-feira',
+            'Sábado',
+            'Domingo'
+              ]
+        data_calendar = datetime.now()
+        date=data_calendar
+        weekday_name = DIAS[data_calendar.weekday()]
+        data_calendar = "{} {}:{} {}-{}-{}".format(weekday_name, data_calendar.hour, data_calendar.minute, data_calendar.day, data_calendar.month, data_calendar.year)
+        
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute("""
+            INSERT INTO worldangels.tb_chat (id_chat,idUserSender, idUserReceiver, message, date_message, date) VALUES( null,'%s', '%s', '%s', '%s', '%s')"""%(data['idUserSender'],data['idUserReceiver'],data['message'],data_calendar, date))
+        __conn.commit()
     
     @classmethod
     def cadastro_user(self, data):
@@ -193,6 +276,33 @@ COLLATE=utf8mb4_unicode_ci;""")
             array_response.append(d)
         dados = json.dumps(array_response)
         return dados
+    
+    @classmethod
+    def get_avatar(self, idUser):
+        """ retorna o link do avatar do usuario tipo de dado String"""
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute("SELECT avatarUrl FROM tb_user where idUser = '%s'"%(idUser))
+        response = __cursor.fetchone()
+        print("RESPONSE EM GET_AVATAR %s"%response)
+        if response == None:
+            response = "/static/images/avatar_default.png"
+            return response
+        else:
+            print("response puro %s"%response)
+            return response
+        
+        
+        
+    
+    @classmethod
+    def get_user_category(self, idUser):
+        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __cursor = __conn.cursor()
+        __cursor.execute(""" SELECT name, categories FROM tb_user where idUser = '%s'"""%idUser)
+        response = __cursor.fetchall()
+        print("response get_user_category %s"%response)
+        return response
         
 
         

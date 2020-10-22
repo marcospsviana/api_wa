@@ -1,4 +1,10 @@
+# -*- coding: utf-8 -*-
 import os
+## import referente ao websocket e dependencias ##
+import asyncio
+import ssl
+import pathlib
+import websocket
 import time
 import json
 from flask import Flask, request, jsonify
@@ -11,10 +17,11 @@ from flask_socketio import SocketIO
  
 UPLOAD_FOLDER = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/categories'
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
- 
+_DATA_DAO = DAO()
+
  
 app = Flask(__name__)
-socketio = SocketIO(app)
+socket_io = SocketIO(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
  
@@ -76,7 +83,7 @@ def upload_service():
 @app.route('/profile', methods=['POST', 'PUT'], endpoint='upload_profile')
 def upload_profile():
     path_create = ''
-    data_dao = DAO()
+    #data
     if request.method == 'POST':
         for file in request.files.getlist('profile'):
             filename_image = file.filename
@@ -106,24 +113,28 @@ def upload_profile():
             for p in photos_dir:
                 str_photos = str_photos + '###' + str(p)
             print("photos_dir %s"%photos_dir)
-            data_dao.cadastro_photos_user(filename_path, str(str_photos))
+            _DATA_DAO.cadastro_photos_user(filename_path, str(str_photos))
             
             
        
         return 'ok', 200
     
-@socketio.on('/chat')
+@socket_io.on('message')
 def chat_socket(data):
-    prin('recebido json socket: ' + str(data))
+    print(str(data))
+    socket_io.emit(data["idUserReceiver"], '%s'%json.dumps(data))
+    print('recebido json socket: ' + str(data))
+    
     
     
 @app.route('/chat', methods=['POST'], endpoint='chat')
 def chat():
     data = request.get_json()
     print("data chat %s"%data)
-    data_dao = DAO()
+    #data
+    _DATA_DAO.insert_chat(data)
     
-    file_chat = "%s_%s.txt"%(data['from'],data['to'])
+    """file_chat = "%s_%s.txt"%(data['from'],data['to'])
     file_chat2 = "%s_%s.txt"%(data['to'], data['from'])
     if data['from'] in os.listdir("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat"):
         print("VAI GRAVAR......")
@@ -151,14 +162,44 @@ def chat():
         os.makedirs("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s"%data['to'])
         f = open("/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/chat/%s/%s_%s.txt"%(data['to'], data['from'],data['to']), '+a')
         f.write("from: " + data['from'] + " " + "message: " + data['message'] + "\n")
-        f.close()
+        f.close()"""
     return 'ok',200
+
+@app.route('/receivechat', methods=['POST'], endpoint='receive_chat')
+def receive_chat():
+    data = request.get_json()
+    #data
+    retorno = _DATA_DAO.receive_chat(data['idUser'])
+    print("%s"%(json.dumps(retorno)))
+    retorno = json.dumps(retorno)
+    retorno = str(retorno)
+    retorno = retorno.replace("[","")
+    retorno = retorno.replace("]","")
+    retorno = [retorno]
+    retorno = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    #print("retorno -----> '%s'"%(retorno))
+    return retorno
+
+@app.route('/receivechatunique', methods=['POST'], endpoint='receive_chat_unique')
+def receive_chat_unique():
+    data = request.get_json()
+    #data
+    retorno = _DATA_DAO.receive_chat_unique(data['idUserReceiver'])
+    print("%s"%(json.dumps(retorno)))
+    retorno = json.dumps(retorno)
+    retorno = str(retorno)
+    retorno = retorno.replace("[","")
+    retorno = retorno.replace("]","")
+    retorno = [retorno]
+    retorno = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    #print("retorno -----> '%s'"%(retorno))
+    return retorno
             
 
 @app.route('/offerservice', methods=['POST', 'PUT'], endpoint='offer_service')
 def offer_service():
     data = request.get_json()
-    data_dao = DAO()
+    #data
     print(data)
     data_json = dict(idUser=data['idUser'], name=data['name'], description=data['description'], dateRegister=data['dateRegister'], categories = data['categories'], subcategories=data['subCategories'], email=data['email'])
     destination = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s/%s.json'%(data['categories'], data['idUser'], data['idUser'])
@@ -179,13 +220,13 @@ def offer_service():
         #f = open(destination, 'w')
         #json.dump(data, f)
         #f.close()
-    data_dao.cadastro_user(data)
+    _DATA_DAO.cadastro_user(data)
        
     return 'ok', 200
 
 @app.route('/deleteimageprofile', methods=['DELETE'], endpoint='deleteimageprofile')
 def deleteimageprofile():
-    data_dao = DAO()
+    #data
     data = request.get_json()
     print(data['photos'])
     data_json = dict(photos=data['photos'])
@@ -193,7 +234,7 @@ def deleteimageprofile():
     idUser = data['idUser']
     destination =  '/home/coolbagsafe/apps_wsgi/api_wa/wa/' + data['photos']
     os.remove(destination)
-    data_dao.delete_photos_user(idUser, key_number)
+    _DATA_DAO.delete_photos_user(idUser, key_number)
     return 'ok', 200
 
 @app.route('/searchprof', methods=['POST', 'GET'], endpoint='search_professional')
@@ -229,8 +270,8 @@ def get_categories():
     data = request.get_json()
     print(data['category'])
     data_json = dict(categorie=data['category'])
-    data_dao = DAO()
-    retorno = data_dao.get_category(data['category'])
+    #data
+    retorno = _DATA_DAO.get_category(data['category'])
     data = {json.dumps(retorno)}
     print(retorno)
     response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
@@ -239,7 +280,7 @@ def get_categories():
 @app.route('/avatar', methods=['POST'], endpoint='avatar')
 def avatar():
     if request.method == 'POST':
-        data_dao = DAO()
+        #data
         for file in request.files.getlist('avatar'):
             filename_image = file.filename
             image_name = 'avatar.jpg'
@@ -261,23 +302,38 @@ def avatar():
                 destination = os.path.join('/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories',filename_categorie,'avatares', filename_path, image_name)
             file.save(destination)
             image_database =  os.path.join('/static/profiles/offerservice/categories',filename_categorie,'avatares', filename_path, image_name)
-            data_dao.avatar(filename_path, image_database)
+            _DATA_DAO.avatar(filename_path, image_database)
        
         return 'ok', 200
     
 
 @app.route('/getuserdepoimentos', methods=['POST'], endpoint='get_user_depoimentos')
 def get_user_depoimentos():
-    data_dao = DAO()
+    #data
     data = request.get_json()
     print("DATA IN GETUSERDEPOIMENTOS %s"%data)
-    retorno =  data_dao.get_user_depoimentos(data['idUser'])
+    retorno =  _DATA_DAO.get_user_depoimentos(data['idUser'])
     data = {json.dumps(retorno)}
     print(retorno)
     response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
     return response
-    
+
+@app.route('/getavatar', methods=['POST'], endpoint='get_avatar')
+def get_avatar():
+    #data
+    data = request.get_json()
+    print(data)
+    response = _DATA_DAO.get_avatar(data['idUser'])
+    return str(response[0])
+
+@app.route("/getusercategory", methods=['POST'], endpoint="get_user_category")
+def get_user_category():
+    data = request.get_json()
+    retorno = _DATA_DAO.get_user_category(data['idUser'])
+    response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    return response
+
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='10.15.1.45', port=5000, debug=True)
+    socket_io.run(app, host='10.15.1.45', port=5000, debug=True)

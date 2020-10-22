@@ -24,3 +24,24 @@ class DataAccesObjects(object):
     def get_user_depoimentos(self, idUser):
         retorno = self.__data.get_user_depoimentos(idUser)
         return retorno
+    
+    def insert_chat(self, data):
+        retorno = self.__data.insert_chat(data)
+        
+    def get_avatar(self, idUser):
+        response = self.__data.get_avatar(idUser)
+        return response
+    
+    
+    def receive_chat(self, idUser):
+        response = self.__data.receive_chat(idUser)
+        return response
+    
+    def get_user_category(self, idUser):
+        response = self.__data.get_user_category(idUser)
+        return response
+    
+    def receive_chat_unique(self, idUserReceiver):
+        retorno = self.__data.receive_chat_unique(idUserReceiver)
+        return retorno
+        

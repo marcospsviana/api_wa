@@ -78,10 +78,10 @@ COLLATE=utf8mb4_unicode_ci;""")
     def receive_chat(self, idUser):
         print("id user em receive_chat %s"%idUser)
         data_array = []
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn =  self.db_conn()
         __cursor = __conn.cursor()
-        #__cursor.execute(""" SELECT * FROM tb_chat WHERE idUserSender = '%s' or idUserReceiver = '%s'"""%(idUser, idUser))
-        __cursor.execute("""select *  from tb_chat where idUserSender = "%s" group by idUserReceiver  ORDER BY (date) ASC"""%(idUser))
+        __cursor.execute(""" SELECT * FROM tb_chat where  id_chat in (select MAX(id_chat) from tb_chat where idUserSender = '%s' group by idUserReceiver);"""%idUser)
+        #__cursor.execute("""select *  from tb_chat where idUserSender = "%s" group by idUserReceiver  ORDER BY (date) ASC"""%(idUser))
         #__cursor.execute("""select * , COUNT(idUserSender) from tb_chat where idUserSender = '%s' or idUserReceiver = '%s' group by id_chat HAVING COUNT(idUserSender) > 0 ORDER BY (date) ASC;"""%(idUser, idUser))
         response = __cursor.fetchall()
         #print("response in data access %s "%response)
@@ -99,7 +99,7 @@ COLLATE=utf8mb4_unicode_ci;""")
     @classmethod
     def receive_chat_unique(self, idUserReceiver):
         data_array = []
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn =  self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute(""" SELECT * FROM tb_chat WHERE (idUserSender = '%s' or idUserReceiver = '%s')"""%(idUserReceiver, idUserReceiver))
         #__cursor.execute("""select * from tb_chat where idUserSender = '%s' OR idUserReceiver = '%s' group by idUserReceiver having count(id_chat) > 0 ORDER BY (id_chat) ASC;"""%(idUser, idUser))
@@ -134,7 +134,7 @@ COLLATE=utf8mb4_unicode_ci;""")
         weekday_name = DIAS[data_calendar.weekday()]
         data_calendar = "{} {}:{} {}-{}-{}".format(weekday_name, data_calendar.hour, data_calendar.minute, data_calendar.day, data_calendar.month, data_calendar.year)
         
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("""
             INSERT INTO worldangels.tb_chat (id_chat,idUserSender, idUserReceiver, message, date_message, date) VALUES( null,'%s', '%s', '%s', '%s', '%s')"""%(data['idUserSender'],data['idUserReceiver'],data['message'],data_calendar, date))
@@ -142,11 +142,12 @@ COLLATE=utf8mb4_unicode_ci;""")
     
     @classmethod
     def cadastro_user(self, data):
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        data_calendar = datetime.now()
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         print(data['localization'])
         __cursor.execute("""
-        INSERT INTO tb_user (id,idUser,avatarUrl,name,email,categories,subcategories,description,likes,dislikes,totalVotos,localization,price,saves, photos) VALUES (null, '%s', null, '%s','%s', '%s', '%s','%s', 0, 0, 0,'%s,%s',0,null,null)"""%(data['idUser'],data['name'],data['email'],data['categories'],data['subCategories'],data['description'],data['localization'][1],data['localization'][2]))
+        INSERT INTO tb_user (id,idUser,avatarUrl,name,email,categories,subcategories,description,likes,dislikes,totalVotos,localization,price,saves, photos) VALUES (null, '%s', null, '%s','%s', '%s', '%s','%s', 0, 0, 0,'%s,%s','%s',null,null, '%s')"""%(data['idUser'],data['name'],data['email'],data['categories'],data['subCategories'],data['description'],data['localization'][1],data['localization'][2],data['price'], data_calendar))
        # __cursor.execute(""" INSERT INTO tb_user_json (id, user) VALUES ( null, '{"user":'%s'}') """%data)
         __conn.commit()
     
@@ -156,7 +157,7 @@ COLLATE=utf8mb4_unicode_ci;""")
         print(dados)
         print("idUser ----> %s"%idUser)
         print(" ------ fim dados ------")
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         #__cursor.execute("SELECT id_photos from tb_photos_portfolio where idUser = '%s'"%idUser)
         #response = __cursor.fetchall()
@@ -173,7 +174,7 @@ COLLATE=utf8mb4_unicode_ci;""")
     @classmethod
     def delete_photos_user(self, idUser, key_number):
         print("idUser, key_number  ===> %s , %s"%(idUser, key_number))
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("SELECT idUser from tb_user where idUser = '%s'"%idUser)
         response = __cursor.fetchall()
@@ -186,7 +187,7 @@ COLLATE=utf8mb4_unicode_ci;""")
     
     @classmethod
     def get_category(self, category):
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("SELECT * from tb_user where categories = '%s'"%category)
         #sql = "SELECT * from tb_user"
@@ -225,14 +226,14 @@ COLLATE=utf8mb4_unicode_ci;""")
     
     @classmethod
     def avatar(self,filename_path, destination):
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("""UPDATE tb_user SET avatarUrl = '%s'  WHERE idUser = '%s'"""%(destination, filename_path))
         __conn.commit()
     
     @classmethod
     def get_user_profile(self, idUser):
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister, FROM tb_user where idUser = '%s'"%(idUser))
         response = __cursor.fetchall()
@@ -261,7 +262,7 @@ COLLATE=utf8mb4_unicode_ci;""")
     
     @classmethod
     def get_user_depoimentos(self, idUser):
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("SELECT * FROM tb_depoimentos where idUser = '%s'"%(idUser))
         response = __cursor.fetchall()
@@ -280,7 +281,7 @@ COLLATE=utf8mb4_unicode_ci;""")
     @classmethod
     def get_avatar(self, idUser):
         """ retorna o link do avatar do usuario tipo de dado String"""
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute("SELECT avatarUrl FROM tb_user where idUser = '%s'"%(idUser))
         response = __cursor.fetchone()
@@ -297,7 +298,7 @@ COLLATE=utf8mb4_unicode_ci;""")
     
     @classmethod
     def get_user_category(self, idUser):
-        __conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        __conn = self.db_conn()
         __cursor = __conn.cursor()
         __cursor.execute(""" SELECT name, categories FROM tb_user where idUser = '%s'"""%idUser)
         response = __cursor.fetchall()

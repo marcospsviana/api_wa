@@ -198,6 +198,7 @@ COLLATE=utf8mb4_unicode_ci;""")
         #return parsed
         array_response = []
         data = {}
+        d = collections.OrderedDict()
         for r in response:
             d = collections.OrderedDict()
             #d["id"] = r[0]
@@ -235,10 +236,11 @@ COLLATE=utf8mb4_unicode_ci;""")
     def get_user_profile(self, idUser):
         __conn = self.db_conn()
         __cursor = __conn.cursor()
-        __cursor.execute("SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister, FROM tb_user where idUser = '%s'"%(idUser))
+        __cursor.execute("SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister FROM tb_user where idUser = '%s'"%(idUser))
         response = __cursor.fetchall()
         array_response = []
         dados = {}
+        d = collections.OrderedDict()
         for r in response:
             d["name"] = r[0]
             d["avatarUrl"] = r[1]
@@ -252,6 +254,51 @@ COLLATE=utf8mb4_unicode_ci;""")
             d["price"] = r[9]
             d["photos"] = r[10]
             d["dateRegister"] = r[11]
+            if d["totalVotos"] == 0:
+                d["totalVotos"] = 1
+            d["rate"] = d["likes"] / d["totalVotos"]
+            array_response.append(d)
+            
+        dados = json.dumps(array_response)
+        return dados
+    
+    
+    @classmethod
+    def get_saves(self, idUser):
+        __conn = self.db_conn()
+        __cursor = __conn.cursor()
+        saves = tuple(idUser)
+        where_clause = ",".join(["%s"]*len(idUser))
+        query = """SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos FROM `tb_user` where `idUser` in ({}) group by name"""
+        query = query.format(where_clause)
+        print(query)
+        print(idUser)
+        #s = ''
+        #args = (saves,)
+        #__cursor.execute("""SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister, FROM tb_user where idUser in %s;"""% (saves,))
+        #sql_query = 'SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister FROM tb_user where idUser IN (" ",%s)' % ','.join(map(str, saves)) 
+        #__cursor.execute("SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister, FROM tb_user where idUser in ({', '.join(s for s in saves })"%(saves))
+        __cursor.execute(query, idUser)
+        #__cursor.execute('SELECT name, avatarUrl, categories, subCategories, description, likes, dislikes, totalVotos, localization, price, photos, dateRegister FROM tb_user where idUser in ?'%(saves,))
+        response = __cursor.fetchall()
+        
+        array_response = []
+        
+        dados = {}
+        for r in response:
+            d = collections.OrderedDict()
+            d["name"] = r[0]
+            d["avatarUrl"] = r[1]
+            d["categories"] = r[2]
+            d["subCategories"] = r[3]
+            d["description"] = r[4]
+            d["likes"] = r[5]
+            d["dislikes"] = r[6]
+            d["totalVotos"] = r[7]
+            d["localization"] = r[8]
+            d["price"] = r[9]
+            d["photos"] = r[10]
+            #d["dateRegister"] = r[11]
             if d["totalVotos"] == 0:
                 d["totalVotos"] = 1
             d["rate"] = d["likes"] / d["totalVotos"]

@@ -333,6 +333,20 @@ def get_user_category():
     response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
     return response
 
+@app.route("/getsaves", methods=['POST'], endpoint="get_saves")
+def get_saves():
+    data = request.get_json()
+    #saves = tuple(data["saves"])
+    retorno = _DATA_DAO.get_saves(data["saves"])
+    response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    #print("response GETSAVES %s"%response.data)
+    return response
+
+@app.route("/setsalvos", methods=['POST'], endpoint="set_salvos")
+def set_salvos():
+    data = request.get_json()
+    retorno = _DATA_DAO.add_saves(data['salvos'])
+    return retorno
 
 
 if __name__ == '__main__':

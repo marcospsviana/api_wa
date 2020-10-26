@@ -44,4 +44,9 @@ class DataAccesObjects(object):
     def receive_chat_unique(self, idUserReceiver):
         retorno = self.__data.receive_chat_unique(idUserReceiver)
         return retorno
+    
+    def get_saves(self, idUser):
+        retorno = self.__data.get_saves(idUser)
+        return retorno
+
         

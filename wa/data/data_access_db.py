@@ -240,8 +240,9 @@ COLLATE=utf8mb4_unicode_ci;""")
         response = __cursor.fetchall()
         array_response = []
         dados = {}
-        d = collections.OrderedDict()
+        
         for r in response:
+            d = collections.OrderedDict()
             d["name"] = r[0]
             d["avatarUrl"] = r[1]
             d["categories"] = r[2]

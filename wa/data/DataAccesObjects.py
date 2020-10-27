@@ -25,6 +25,10 @@ class DataAccesObjects(object):
         retorno = self.__data.get_user_depoimentos(idUser)
         return retorno
     
+    def set_user_depoimentos(self, depoimento):
+        retorno = self.__data.set_user_depoimentos(idUser)
+        return retorno
+    
     def insert_chat(self, data):
         retorno = self.__data.insert_chat(data)
         

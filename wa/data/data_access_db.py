@@ -327,6 +327,24 @@ COLLATE=utf8mb4_unicode_ci;""")
         return dados
     
     @classmethod
+    def set_user_depoimentos(self, depoimentos):
+        __conn = self.db_conn()
+        __cursor = __conn.cursor()
+        __cursor.execute("INSERT INTO tb_depoimentos (id, idUser, titulo, depoimentos, likes, dislike) values (null, %(idUser)s, %(titulo)s, %(depoimentos)s, %(likes)s, %(dislike)s)", ({"idUser": depoimentos['idUser'], "titulo": depoimentos['titulo'], "depoimentos":depoimentos['depoimentos'], "likes":depoimentos['likes'], "dislike":depoimentos['dislike']}))
+        response = __cursor.fetchall()
+        array_response = []
+        dados = {}
+        for r in response:
+            d = collections.OrderedDict()
+            d["titulo"] = r[2]
+            d["depoimentos"] = r[3]
+            d["likes"] = r[4]
+            d["dislike"] = r[5]
+            array_response.append(d)
+        dados = json.dumps(array_response)
+        return dados
+    
+    @classmethod
     def get_avatar(self, idUser):
         """ retorna o link do avatar do usuario tipo de dado String"""
         __conn = self.db_conn()

@@ -318,6 +318,17 @@ def get_user_depoimentos():
     response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
     return response
 
+@app.route('/setuserdepoimentos', methods=['POST'], endpoint='set_user_depoimentos')
+def set_user_depoimentos():
+    #data
+    data = request.get_json()
+    print("DATA IN GETUSERDEPOIMENTOS %s"%data)
+    retorno =  _DATA_DAO.set_user_depoimentos(data['avaliacao'])
+    #data = {json.dumps(retorno)}
+    #print(retorno)
+    #response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')
+    #return response
+
 @app.route('/getavatar', methods=['POST'], endpoint='get_avatar')
 def get_avatar():
     #data

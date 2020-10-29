@@ -25,7 +25,7 @@ class DataAccessDB:
         self.__cursor.execute("""CREATE TABLE IF NOT EXISTS `tb_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `idUser` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `avatarUrl` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `avatarUrl` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `name` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `categories` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -35,37 +35,33 @@ class DataAccessDB:
   `dislikes` int(10) DEFAULT NULL,
   `totalVotos` int(15) DEFAULT NULL,
   `localization` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `price` TEXT DEFAULT NULL,
-  `saves` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` text COLLATE utf8mb4_unicode_ci DEFAULT 0.0,
+  `saves` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `photos` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dateRegister` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"""
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"""
             )
         
-        self.__cursor.execute("""CREATE TABLE IF NOT EXISTS worldangels.tb_depoimentos (
-	id BIGINT auto_increment NULL,
-	idUser TEXT NOT NULL,
-	depoimentos LONGTEXT NOT NULL,
-	likes BIT DEFAULT 0 NULL,
-	dislike BIT DEFAULT 0 NULL,
-	PRIMARY KEY (id)
-)
-ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_unicode_ci;""")
+        self.__cursor.execute("""CREATE TABLE IF NOT EXISTS worldangels.`tb_depoimentos` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `idUser` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `titulo` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `depoimentos` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `likes` bit(1) DEFAULT b'0',
+  `dislike` bit(1) DEFAULT b'0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;""")
         
         self.__cursor.execute("""CREATE TABLE IF NOT EXISTS worldangels.tb_chat (
-	id_chat BIGINT auto_increment NOT NULL,
-	idUser TEXT NOT NULL,
-	`from` varchar(100) NULL,
-	`to` varchar(100) NULL,
-	message LONGTEXT NULL,
-	PRIMARY KEY (id_chat)
-)
-ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_unicode_ci;""")
+  `id_chat` bigint(20) NOT NULL AUTO_INCREMENT,
+  `idUserSender` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `idUserReceiver` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `message` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_message` tinytext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`id_chat`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;""")
         
         
         

@@ -25,7 +25,7 @@ class DataAccessDB:
         self.__cursor.execute("""CREATE TABLE IF NOT EXISTS `tb_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `idUser` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `avatarUrl` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`avatarUrl`)),
+  `avatarUrl` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `name` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `categories` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -35,9 +35,9 @@ class DataAccessDB:
   `dislikes` int(10) DEFAULT NULL,
   `totalVotos` int(15) DEFAULT NULL,
   `localization` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `price` float DEFAULT NULL,
-  `saves` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `photos` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` TEXT DEFAULT NULL,
+  `saves` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `photos` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dateRegister` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"""

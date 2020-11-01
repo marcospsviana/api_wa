@@ -14,8 +14,8 @@ class DataAccesObjects(object):
     def delete_photos_user(self, idUser, key_number):
         self.__data.delete_photos_user(idUser, key_number)
     
-    def get_category(self, category):
-        retorno = self.__data.get_category(category)
+    def get_category(self, data):
+        retorno = self.__data.get_category(data)
         return retorno
     
     def avatar(self,filename_path, destination):

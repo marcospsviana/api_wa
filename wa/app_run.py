@@ -200,7 +200,7 @@ def receive_chat_unique():
 def offer_service():
     data = request.get_json()
     #data
-    print(data)
+    print("data OFFERSERVICE %s"%data)
     data_json = dict(idUser=data['idUser'], name=data['name'], description=data['description'], dateRegister=data['dateRegister'], categories = data['categories'], subcategories=data['subCategories'], email=data['email'])
     destination = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s/%s.json'%(data['categories'], data['idUser'], data['idUser'])
     destination_dir = '/home/coolbagsafe/apps_wsgi/api_wa/wa/static/profiles/offerservice/categories/%s/%s'%(data['categories'], data['idUser'])
@@ -271,7 +271,7 @@ def get_categories():
     print(data['category'])
     data_json = dict(categorie=data['category'])
     #data
-    retorno = _DATA_DAO.get_category(data['category'])
+    retorno = _DATA_DAO.get_category(data)
     data = {json.dumps(retorno)}
     print(retorno)
     response = app.response_class(response=json.dumps(retorno), status=200, mimetype='application/json')

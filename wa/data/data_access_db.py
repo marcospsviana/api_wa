@@ -143,7 +143,7 @@ class DataAccessDB:
         __cursor = __conn.cursor()
         print(data['localization'])
         __cursor.execute("""
-        INSERT INTO tb_user (id,idUser,avatarUrl,name,email,categories,subcategories,description,likes,dislikes,totalVotos,localization,price,saves, photos) VALUES (null, '%s', null, '%s','%s', '%s', '%s','%s', 0, 0, 0,'%s,%s','%s',null,null, '%s')"""%(data['idUser'],data['name'],data['email'],data['categories'],data['subCategories'],data['description'],data['localization'][1],data['localization'][2],data['price'], data_calendar))
+        INSERT INTO tb_user (id,idUser,avatarUrl,name,email,categories,subcategories,description,likes,dislikes,totalVotos,localization,price,saves, photos, dateRegister) VALUES (null, '%s', null, '%s','%s', '%s', '%s','%s', 0, 0, 0,'%s,%s,%s','%s',null,null, '%s')"""%(data['idUser'],data['name'],data['email'],data['categories'],data['subCategories'],data['description'],data['localization'][0],data['localization'][1],data['localization'][2],data['price'], data_calendar))
        # __cursor.execute(""" INSERT INTO tb_user_json (id, user) VALUES ( null, '{"user":'%s'}') """%data)
         __conn.commit()
     
@@ -182,10 +182,18 @@ class DataAccessDB:
             __conn.commit()
     
     @classmethod
-    def get_category(self, category):
+    def get_category(self, data):
         __conn = self.db_conn()
         __cursor = __conn.cursor()
-        __cursor.execute("SELECT * from tb_user where categories = '%s'"%category)
+        #where_clause = ",".join(["%s"]*len(data))
+        #query = """SELECT * FROM `tb_user` where categories = {} and `idUser` not in ({}) group by name"""
+        #query = query.format()
+        #print(query)
+        print("idUser IN DATA ACCESS %s"%data['idUser'])
+        __cursor.execute("SELECT * from tb_user where categories = '%s' and idUser != '%s'"%(data['category'],data['idUser']))
+        #idUser = data['idUser']
+        #category = data['category']
+        #__cursor.execute(query, category, idUser)
         #sql = "SELECT * from tb_user"
         #result = pd.read_sql(sql, __conn)
         #result_json = result.to_json(orient="index")

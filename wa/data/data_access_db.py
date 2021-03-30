@@ -11,10 +11,10 @@ class DataAccessDB:
     
     def __init__(self):
         self.__host = 'localhost'
-        self.__user = 'root'
-        self.__passwd = 'microat8501'
-        self.__db = 'worldangels'
-        self.__conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels') #sqlite3.connect('offerservice.db')
+        self.__user = 'myuser'
+        self.__passwd = 'mysecret_password'
+        self.__db = 'mydb'
+        self.__conn =  mdb.connect(host='localhost', user='myuser', password='*******', database='mydb') 
         self.__cursor = self.__conn.cursor()
         
         self.__cursor.execute("""CREATE TABLE IF NOT EXISTS `worldangels`.`tb_user_json` (
@@ -67,7 +67,7 @@ class DataAccessDB:
         
     @classmethod
     def db_conn(self):
-        self.__conn =  mdb.connect(host='localhost', user='root', password='microat8051', database='worldangels')
+        self.__conn =  mdb.connect(host='localhost', user='user', password='*****', database='mydb')
         return self.__conn
     
     @classmethod
